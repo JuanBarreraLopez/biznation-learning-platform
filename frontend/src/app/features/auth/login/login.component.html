@@ -1,22 +1,27 @@
-<div style="max-width: 400px; margin: 100px auto; padding: 30px; border: 1px solid #e0e0e0; border-radius: 8px; font-family: sans-serif; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-  <h2 style="text-align: center; color: #333;">Biz Nation Learning</h2>
+<div style="max-width: 400px; margin: 100px auto; padding: 30px; border: 1px solid #e0e0e0; border-radius: 8px; font-family: sans-serif; box-shadow: 0 4px 6px rgba(0,0,0,0.1); background-color: white;">
+  <h2 style="text-align: center; color: #333; margin-top: 0;">Biz Nation Learning</h2>
   <p style="text-align: center; color: #666; margin-bottom: 20px;">Inicia sesión para continuar</p>
+
+  <!-- Nuevo Sistema de Mensajes (reemplazó al errorMessage) -->
+  <div *ngIf="uiMessage" style="background-color: #f8d7da; color: #721c24; padding: 10px; border-radius: 4px; margin-bottom: 15px; font-size: 14px; text-align: center;">
+    {{ uiMessage.text }}
+  </div>
 
   <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
     <div style="margin-bottom: 15px;">
-      <label style="display: block; margin-bottom: 5px; font-weight: bold;">Correo Electrónico:</label>
+      <label style="display: block; margin-bottom: 5px; font-weight: bold; font-size: 14px; color: #333;">Correo Electrónico:</label>
       <input type="email" formControlName="email" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;" placeholder="admin@biznation.com">
     </div>
 
-    <div style="margin-bottom: 15px;">
-      <label style="display: block; margin-bottom: 5px; font-weight: bold;">Contraseña:</label>
+    <div style="margin-bottom: 20px;">
+      <label style="display: block; margin-bottom: 5px; font-weight: bold; font-size: 14px; color: #333;">Contraseña:</label>
       <input type="password" formControlName="password" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;" placeholder="******">
     </div>
 
-    <p *ngIf="errorMessage" style="color: #d32f2f; font-size: 14px; text-align: center;">{{ errorMessage }}</p>
-
-    <button type="submit" [disabled]="loginForm.invalid" style="width: 100%; padding: 12px; background-color: #0056b3; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; margin-top: 10px;">
-      Ingresar
+    <button type="submit" [disabled]="loginForm.invalid || isLoading"
+            style="width: 100%; padding: 12px; background-color: #0056b3; color: white; border: none; border-radius: 4px; font-size: 16px; font-weight: bold; transition: background-color 0.2s;"
+            [ngStyle]="{'cursor': (loginForm.invalid || isLoading) ? 'not-allowed' : 'pointer', 'opacity': (loginForm.invalid || isLoading) ? '0.7' : '1'}">
+      {{ isLoading ? 'Ingresando...' : 'Ingresar' }}
     </button>
   </form>
 </div>

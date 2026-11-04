@@ -1,0 +1,65 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Biz Nation API",
+    "version": "1.0.0",
+    "description": "API REST para la plataforma educativa de Biz Nation."
+  },
+  "servers": [
+    { "url": "http://localhost:3000/api/v1" }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  },
+  "paths": {
+    "/auth/login": {
+      "post": {
+        "summary": "Inicia sesión y obtiene un JWT",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "string" },
+                  "password": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Login exitoso con JWT" },
+          "401": { "description": "Credenciales inválidas" }
+        }
+      }
+    },
+    "/courses": {
+      "get": {
+        "summary": "Lista cursos con paginación y filtros",
+        "parameters": [
+          { "name": "page", "in": "query", "schema": { "type": "integer" } },
+          { "name": "limit", "in": "query", "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": { "description": "Lista de cursos" }
+        }
+      }
+    },
+    "/webhooks": {
+      "post": {
+        "summary": "Recibe eventos externos de forma idempotente",
+        "responses": {
+          "200": { "description": "Evento procesado o ignorado (si es duplicado)" }
+        }
+      }
+    }
+  }
+}

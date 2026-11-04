@@ -1,20 +1,34 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { AuthService } from './auth.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class CourseService {
   private http = inject(HttpClient);
+  private authService = inject(AuthService);
   private apiUrl = 'http://localhost:3000/api/v1/courses';
+
+  private getHeaders() {
+    return {
+      headers: new HttpHeaders({
+        'Authorization': `Bearer ${this.authService.getToken()}`
+      })
+    };
+  }
 
   getCourses(): Observable<any> {
     return this.http.get<any>(this.apiUrl);
   }
 
-  // Nuevo método para que el estudiante actualice su avance
+  // Nuevo método para crear el curso
+  createCourse(courseData: any): Observable<any> {
+    return this.http.post<any>(this.apiUrl, courseData, this.getHeaders());
+  }
+
   updateProgress(lessonId: string): Observable<any> {
-    return this.http.patch(`http://localhost:3000/api/v1/courses/lessons/${lessonId}/progress`, {});
+    return this.http.patch(`${this.apiUrl}/lessons/${lessonId}/progress`, {}, this.getHeaders());
   }
 }
