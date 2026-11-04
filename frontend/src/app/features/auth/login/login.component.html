@@ -1,0 +1,22 @@
+<div style="max-width: 400px; margin: 100px auto; padding: 30px; border: 1px solid #e0e0e0; border-radius: 8px; font-family: sans-serif; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+  <h2 style="text-align: center; color: #333;">Biz Nation Learning</h2>
+  <p style="text-align: center; color: #666; margin-bottom: 20px;">Inicia sesión para continuar</p>
+
+  <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+    <div style="margin-bottom: 15px;">
+      <label style="display: block; margin-bottom: 5px; font-weight: bold;">Correo Electrónico:</label>
+      <input type="email" formControlName="email" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;" placeholder="admin@biznation.com">
+    </div>
+
+    <div style="margin-bottom: 15px;">
+      <label style="display: block; margin-bottom: 5px; font-weight: bold;">Contraseña:</label>
+      <input type="password" formControlName="password" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;" placeholder="******">
+    </div>
+
+    <p *ngIf="errorMessage" style="color: #d32f2f; font-size: 14px; text-align: center;">{{ errorMessage }}</p>
+
+    <button type="submit" [disabled]="loginForm.invalid" style="width: 100%; padding: 12px; background-color: #0056b3; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; margin-top: 10px;">
+      Ingresar
+    </button>
+  </form>
+</div>
