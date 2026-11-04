@@ -9,8 +9,12 @@ export class CourseService {
   private http = inject(HttpClient);
   private apiUrl = 'http://localhost:3000/api/v1/courses';
 
-  getCourses(): Observable<any[]> {
-    // El Interceptor que creamos le pegará el Token automáticamente a esta petición
-    return this.http.get<any[]>(this.apiUrl);
+  getCourses(): Observable<any> {
+    return this.http.get<any>(this.apiUrl);
+  }
+
+  // Nuevo método para que el estudiante actualice su avance
+  updateProgress(lessonId: string): Observable<any> {
+    return this.http.patch(`http://localhost:3000/api/v1/courses/lessons/${lessonId}/progress`, {});
   }
 }

@@ -25,8 +25,20 @@ export class DashboardComponent implements OnInit {
 
   loadCourses() {
     this.courseService.getCourses().subscribe({
-      next: (data) => this.courses = data,
+      next: (response) => {
+        // Adaptamos la lectura porque el backend ahora devuelve { data: [...], pagination: {...} }
+        this.courses = response.data || [];
+      },
       error: (err) => console.error('Error cargando cursos', err)
+    });
+  }
+
+  // Simulación rápida para la prueba técnica (hardcodeamos un UUID válido si tuviéramos uno)
+  // En la vida real, el ID vendría de la lección seleccionada.
+  markLessonAsCompleted(lessonId: string) {
+    this.courseService.updateProgress(lessonId).subscribe({
+      next: (res) => alert(`¡Progreso actualizado! Llevas el ${res.progressPercentage}% del curso.`),
+      error: (err) => alert('Error al actualizar progreso. Verifica que estés matriculado.')
     });
   }
 
