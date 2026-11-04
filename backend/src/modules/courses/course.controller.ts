@@ -1,5 +1,7 @@
 import { Request, Response } from 'express';
 import { AuthRequest } from '../../middlewares/authenticate';
+
+const { Op } = require('sequelize');
 const db = require('../../models');
 const Course = db.Course;
 const Enrollment = db.Enrollment;
@@ -32,9 +34,29 @@ export const createCourse = async (req: AuthRequest, res: Response): Promise<voi
 // Obtener todos los cursos
 export const getCourses = async (req: Request, res: Response): Promise<void> => {
   try {
-    // Solo traemos los que no están eliminados (soft delete)
-    const courses = await Course.findAll();
-    res.status(200).json(courses);
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const offset = (page - 1) * limit;
+
+    const { title, fromDate, toDate } = req.query;
+    const whereClause: any = {};
+
+    if (title) whereClause.title = { [Op.iLike]: `%${title}%` };
+    if (fromDate && toDate) {
+      whereClause.createdAt = { [Op.between]: [new Date(fromDate as string), new Date(toDate as string)] };
+    }
+
+    const { count, rows } = await Course.findAndCountAll({
+      where: whereClause,
+      limit,
+      offset,
+      order: [['createdAt', 'DESC']]
+    });
+
+    res.status(200).json({
+      data: rows,
+      pagination: { page, limit, total: count, totalPages: Math.ceil(count / limit) }
+    });
   } catch (error) {
     console.error('Error al listar cursos:', error);
     res.status(500).json({ error: 'Error interno del servidor' });
