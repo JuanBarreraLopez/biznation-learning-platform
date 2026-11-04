@@ -18,9 +18,13 @@ export class DashboardComponent implements OnInit {
   private fb = inject(FormBuilder);
 
   courses: any[] = [];
+  usersList: any[] = []; // Para la pestaña del admin
   user: any = null;
   isLoading: boolean = false;
   uiMessage: { text: string, type: 'success' | 'error' } | null = null;
+
+  // CONTROL DE PESTAÑAS
+  activeTab: 'courses' | 'users' | 'explore' = 'courses';
 
   studentForm: FormGroup = this.fb.group({
     name: ['', Validators.required],
@@ -28,7 +32,6 @@ export class DashboardComponent implements OnInit {
     password: ['', [Validators.required, Validators.minLength(6)]]
   });
 
-  // 1. Nuevo formulario para cursos
   courseForm: FormGroup = this.fb.group({
     title: ['', Validators.required],
     description: ['', Validators.required]
@@ -36,32 +39,39 @@ export class DashboardComponent implements OnInit {
 
   ngOnInit() {
     this.user = this.authService.getUser();
+    this.activeTab = this.user?.role === 'admin' ? 'courses' : 'courses'; // courses para el admin, mis cursos para estudiante
     this.loadCourses();
+    if (this.user?.role === 'admin') this.loadUsers();
+  }
+
+  setTab(tabName: 'courses' | 'users' | 'explore') {
+    this.activeTab = tabName;
   }
 
   loadCourses() {
     this.courseService.getCourses().subscribe({
       next: (response) => this.courses = response.data || [],
-      error: (err) => this.showMessage('Error cargando los cursos.', 'error')
+      error: (err) => this.showMessage('Error cargando cursos.', 'error')
     });
   }
 
-  // 2. Método para crear curso y recargar la lista
+  loadUsers() {
+    fetch('http://localhost:3000/api/v1/users', {
+      headers: { 'Authorization': `Bearer ${this.authService.getToken()}` }
+    }).then(res => res.json()).then(res => this.usersList = res.data || []);
+  }
+
   createNewCourse() {
     if (this.courseForm.invalid) return;
     this.isLoading = true;
-
     this.courseService.createCourse(this.courseForm.value).subscribe({
-      next: (res) => {
+      next: () => {
         this.isLoading = false;
         this.showMessage('Curso creado exitosamente.', 'success');
         this.courseForm.reset();
-        this.loadCourses(); // Recargamos la lista para ver el nuevo curso
+        this.loadCourses();
       },
-      error: (err) => {
-        this.isLoading = false;
-        this.showMessage('Error al crear el curso.', 'error');
-      }
+      error: () => { this.isLoading = false; this.showMessage('Error al crear curso.', 'error'); }
     });
   }
 
@@ -72,22 +82,33 @@ export class DashboardComponent implements OnInit {
 
     fetch('http://localhost:3000/api/v1/users', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${this.authService.getToken()}`
-      },
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${this.authService.getToken()}` },
       body: JSON.stringify(userData)
-    })
-    .then(res => res.json())
-    .then(data => {
+    }).then(res => res.json()).then(data => {
       this.isLoading = false;
-      if (data.error) throw new Error(data.error);
-      this.showMessage('Estudiante creado exitosamente.', 'success');
+      if (data.error) throw new Error();
+      this.showMessage('Estudiante registrado exitosamente.', 'success');
       this.studentForm.reset();
-    })
-    .catch(err => {
+      this.loadUsers(); // Recargar lista
+    }).catch(err => {
       this.isLoading = false;
-      this.showMessage('Error al crear el estudiante. Quizás el correo ya existe.', 'error');
+      this.showMessage('Error al registrar estudiante (correo duplicado).', 'error');
+    });
+  }
+
+  // NUEVO: Método para que un estudiante se inscriba
+  enrollInCourse(courseId: string) {
+    this.isLoading = true;
+    fetch(`http://localhost:3000/api/v1/courses/${courseId}/enroll`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${this.authService.getToken()}` }
+    }).then(res => res.json()).then(data => {
+      this.isLoading = false;
+      if (data.error) {
+        this.showMessage(data.error, 'error');
+      } else {
+        this.showMessage('¡Inscripción exitosa!', 'success');
+      }
     });
   }
 
@@ -98,7 +119,7 @@ export class DashboardComponent implements OnInit {
         this.isLoading = false;
         this.showMessage(`¡Progreso actualizado! Llevas el ${res.progressPercentage}% del curso.`, 'success');
       },
-      error: (err) => {
+      error: () => {
         this.isLoading = false;
         this.showMessage('Error al actualizar progreso.', 'error');
       }

@@ -12,18 +12,13 @@ export class CourseService {
   private apiUrl = 'http://localhost:3000/api/v1/courses';
 
   private getHeaders() {
-    return {
-      headers: new HttpHeaders({
-        'Authorization': `Bearer ${this.authService.getToken()}`
-      })
-    };
+    return { headers: new HttpHeaders({ 'Authorization': `Bearer ${this.authService.getToken()}` }) };
   }
 
   getCourses(): Observable<any> {
     return this.http.get<any>(this.apiUrl);
   }
 
-  // Nuevo método para crear el curso
   createCourse(courseData: any): Observable<any> {
     return this.http.post<any>(this.apiUrl, courseData, this.getHeaders());
   }

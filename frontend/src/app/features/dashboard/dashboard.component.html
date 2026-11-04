@@ -1,95 +1,131 @@
-<div style="padding: 20px; font-family: sans-serif; max-width: 800px; margin: 0 auto;">
+<div style="padding: 30px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 1000px; margin: 0 auto;">
+
   <!-- CABECERA -->
-  <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 20px;">
-    <h2>Panel de {{ user?.role === 'admin' ? 'Administrador' : 'Estudiante' }}</h2>
+  <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #ddd; padding-bottom: 20px; margin-bottom: 20px;">
     <div>
-      <span style="margin-right: 15px; color: #555;">Hola, {{ user?.name || 'Usuario' }}</span>
-      <button (click)="logout()" style="background-color: #dc3545; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer;">Cerrar Sesión</button>
+      <h2 style="margin: 0; color: #333;">Biz Nation Learning</h2>
+      <span style="background-color: #0056b3; color: white; padding: 3px 8px; border-radius: 12px; font-size: 12px; font-weight: bold; text-transform: uppercase;">
+        {{ user?.role === 'admin' ? 'Administrador' : 'Estudiante' }}
+      </span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 15px;">
+      <span style="color: #555; font-weight: 500;">👋 Hola, {{ user?.name || 'Usuario' }}</span>
+      <button (click)="logout()" style="background-color: #dc3545; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 600; transition: 0.2s;">Salir</button>
     </div>
   </div>
 
-  <!-- SISTEMA DE NOTIFICACIONES VISUALES -->
-  <div *ngIf="uiMessage"
-       [ngStyle]="{'background-color': uiMessage.type === 'success' ? '#d4edda' : '#f8d7da', 'color': uiMessage.type === 'success' ? '#155724' : '#721c24'}"
-       style="padding: 12px; border-radius: 4px; margin-bottom: 20px; border: 1px solid transparent;">
+  <!-- NOTIFICACIONES -->
+  <div *ngIf="uiMessage" [ngStyle]="{'background-color': uiMessage.type === 'success' ? '#d4edda' : '#f8d7da', 'color': uiMessage.type === 'success' ? '#155724' : '#721c24'}" style="padding: 15px; border-radius: 6px; margin-bottom: 20px; font-weight: 500; border-left: 5px solid; border-color: inherit;">
     {{ uiMessage.text }}
   </div>
 
-<!-- VISTA ADMINISTRADOR -->
-  <div *ngIf="user?.role === 'admin'">
-    <h3>Gestión y Configuración (Admin)</h3>
+  <!-- NAVEGACIÓN (PESTAÑAS ADMIN) -->
+  <div *ngIf="user?.role === 'admin'" style="display: flex; gap: 10px; margin-bottom: 25px; border-bottom: 2px solid #eee;">
+    <button (click)="setTab('courses')" [ngStyle]="{'background': activeTab === 'courses' ? '#0056b3' : 'transparent', 'color': activeTab === 'courses' ? 'white' : '#555'}" style="border: none; padding: 10px 20px; font-size: 15px; font-weight: 600; cursor: pointer; border-radius: 6px 6px 0 0;">📚 Gestión de Cursos</button>
+    <button (click)="setTab('users')" [ngStyle]="{'background': activeTab === 'users' ? '#0056b3' : 'transparent', 'color': activeTab === 'users' ? 'white' : '#555'}" style="border: none; padding: 10px 20px; font-size: 15px; font-weight: 600; cursor: pointer; border-radius: 6px 6px 0 0;">👥 Usuarios y Matrículas</button>
+  </div>
 
-    <!-- Formulario para Crear Curso (Real) -->
-    <div style="background-color: #e9ecef; padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #ddd;">
-      <h4 style="margin-top: 0; color: #333;">Crear Nuevo Curso</h4>
-      <form [formGroup]="courseForm" (ngSubmit)="createNewCourse()" style="display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end;">
-        <div style="flex: 1; min-width: 150px;">
-          <label style="font-size: 12px; font-weight: bold; color: #333; display: block; margin-bottom: 4px;">Título</label>
-          <input type="text" formControlName="title" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
+  <!-- NAVEGACIÓN (PESTAÑAS ESTUDIANTE) -->
+  <div *ngIf="user?.role === 'student'" style="display: flex; gap: 10px; margin-bottom: 25px; border-bottom: 2px solid #eee;">
+    <button (click)="setTab('courses')" [ngStyle]="{'background': activeTab === 'courses' ? '#17a2b8' : 'transparent', 'color': activeTab === 'courses' ? 'white' : '#555'}" style="border: none; padding: 10px 20px; font-size: 15px; font-weight: 600; cursor: pointer; border-radius: 6px 6px 0 0;">Mi Progreso</button>
+    <button (click)="setTab('explore')" [ngStyle]="{'background': activeTab === 'explore' ? '#17a2b8' : 'transparent', 'color': activeTab === 'explore' ? 'white' : '#555'}" style="border: none; padding: 10px 20px; font-size: 15px; font-weight: 600; cursor: pointer; border-radius: 6px 6px 0 0;">🔍 Explorar Cursos</button>
+  </div>
+
+  <!-- CONTENIDO: PESTAÑA CURSOS -->
+  <div *ngIf="activeTab === 'courses' || activeTab === 'explore'">
+
+    <!-- Admin: Formulario de Cursos (Solo se ve aquí) -->
+    <div *ngIf="user?.role === 'admin'" style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 25px; border: 1px solid #e9ecef;">
+      <h4 style="margin-top: 0; color: #333; margin-bottom: 15px;">➕ Crear Nuevo Curso</h4>
+      <form [formGroup]="courseForm" (ngSubmit)="createNewCourse()" style="display: flex; gap: 15px; flex-wrap: wrap;">
+        <div style="flex: 1; min-width: 200px;">
+          <input type="text" formControlName="title" placeholder="Título del curso" style="width: 100%; padding: 10px; border: 1px solid #ced4da; border-radius: 6px; box-sizing: border-box;">
         </div>
         <div style="flex: 2; min-width: 250px;">
-          <label style="font-size: 12px; font-weight: bold; color: #333; display: block; margin-bottom: 4px;">Descripción</label>
-          <input type="text" formControlName="description" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
+          <input type="text" formControlName="description" placeholder="Descripción breve" style="width: 100%; padding: 10px; border: 1px solid #ced4da; border-radius: 6px; box-sizing: border-box;">
         </div>
-        <button type="submit" [disabled]="courseForm.invalid || isLoading"
-                style="padding: 9px 15px; background-color: #0056b3; color: white; border: none; border-radius: 4px; font-weight: bold;"
-                [ngStyle]="{'cursor': (courseForm.invalid || isLoading) ? 'not-allowed' : 'pointer', 'opacity': (courseForm.invalid || isLoading) ? '0.7' : '1'}">
-          {{ isLoading ? 'Procesando...' : '+ Crear Curso' }}
+        <button type="submit" [disabled]="courseForm.invalid || isLoading" style="padding: 10px 20px; background-color: #28a745; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;" [ngStyle]="{'opacity': (courseForm.invalid || isLoading) ? '0.6' : '1'}">
+          {{ isLoading ? 'Guardando...' : 'Guardar Curso' }}
         </button>
       </form>
     </div>
 
-    <!-- Formulario para Registrar Estudiante -->
-    <div style="background-color: #f4f6f8; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #ddd;">
-      <h4 style="margin-top: 0; color: #333;">Registrar Nuevo Estudiante</h4>
-      <form [formGroup]="studentForm" (ngSubmit)="createStudent()" style="display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end;">
-        <div style="flex: 1; min-width: 150px;">
-          <label style="font-size: 12px; font-weight: bold; color: #333; display: block; margin-bottom: 4px;">Nombre</label>
-          <input type="text" formControlName="name" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
+    <!-- Grid de Cursos (Muestra catálogo o cursos propios) -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px;">
+      <div *ngFor="let course of courses" style="background: white; border: 1px solid #e2e8f0; border-radius: 10px; padding: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
+        <h3 style="margin: 0 0 10px 0; color: #1e293b;">{{ course.title }}</h3>
+        <p style="color: #64748b; font-size: 14px; margin-bottom: 20px; min-height: 40px;">{{ course.description }}</p>
+
+        <!-- Botones Estudiante -->
+        <div *ngIf="user?.role === 'student'" style="margin-top: auto;">
+          <!-- Pestaña Explorar: Botón de matricularse -->
+          <button *ngIf="activeTab === 'explore'" (click)="enrollInCourse(course.id)" [disabled]="isLoading" style="width: 100%; padding: 10px; background-color: #0d6efd; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">
+            ➕ Inscribirme
+          </button>
+
+          <!-- Pestaña Mi Progreso: Botón de avanzar -->
+          <div *ngIf="activeTab === 'courses'">
+             <!-- Barra de progreso visual -->
+            <div style="width: 100%; background-color: #e9ecef; border-radius: 10px; height: 8px; margin-bottom: 15px;">
+              <div style="background-color: #28a745; height: 8px; border-radius: 10px; width: 30%;"></div> <!-- 30% Hardcodeado para UI, lo conectas al backend -->
+            </div>
+            <button (click)="markLessonAsCompleted('ID_SIMULADO')" [disabled]="isLoading" style="width: 100%; padding: 10px; background-color: #17a2b8; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">
+              ✅ Completar Lección
+            </button>
+          </div>
         </div>
-        <div style="flex: 1; min-width: 150px;">
-          <label style="font-size: 12px; font-weight: bold; color: #333; display: block; margin-bottom: 4px;">Correo</label>
-          <input type="email" formControlName="email" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
+
+        <!-- Vista Admin (Muestra id del curso para relacionar) -->
+        <div *ngIf="user?.role === 'admin'" style="background-color: #f1f5f9; padding: 10px; border-radius: 6px; font-size: 12px; color: #475569; font-family: monospace;">
+          ID: {{ course.id }}
         </div>
-        <div style="flex: 1; min-width: 150px;">
-          <label style="font-size: 12px; font-weight: bold; color: #333; display: block; margin-bottom: 4px;">Contraseña</label>
-          <input type="password" formControlName="password" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
-        </div>
-        <button type="submit" [disabled]="studentForm.invalid || isLoading"
-                style="padding: 9px 15px; background-color: #28a745; color: white; border: none; border-radius: 4px; font-weight: bold;"
-                [ngStyle]="{'cursor': (studentForm.invalid || isLoading) ? 'not-allowed' : 'pointer', 'opacity': (studentForm.invalid || isLoading) ? '0.7' : '1'}">
-          {{ isLoading ? 'Guardando...' : '+ Registrar' }}
-        </button>
-      </form>
-    </div>
-  </div>
-
-  <!-- VISTA ESTUDIANTE -->
-  <div *ngIf="user?.role === 'student'">
-    <h3>Mis Cursos Matriculados</h3>
-    <p style="color: #666; font-size: 14px;">Aquí solo ves los cursos activos en los que tienes matrícula.</p>
-  </div>
-
-  <!-- ESTADO VACÍO (SIN CURSOS) -->
-  <div *ngIf="courses.length === 0" style="padding: 20px; background-color: #f8f9fa; text-align: center; border-radius: 5px; color: #666;">
-    <p>No se encontraron cursos disponibles en este momento.</p>
-  </div>
-
-  <!-- LISTADO DE CURSOS -->
-  <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px;">
-    <div *ngFor="let course of courses" style="border: 1px solid #ddd; border-radius: 8px; padding: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: transform 0.2s;">
-      <h4 style="margin-top: 0; color: #0056b3;">{{ course.title }}</h4>
-      <p style="color: #666; font-size: 14px;">{{ course.description }}</p>
-
-      <!-- Botón de avance (Solo para estudiantes) -->
-      <div *ngIf="user?.role === 'student'" style="margin-top: 15px;">
-        <button (click)="markLessonAsCompleted('ID_SIMULADO')"
-                [disabled]="isLoading"
-                style="width: 100%; padding: 10px; background-color: #17a2b8; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;"
-                [ngStyle]="{'opacity': isLoading ? '0.7' : '1'}">
-          {{ isLoading ? 'Procesando...' : '✅ Completar Lección' }}
-        </button>
       </div>
     </div>
+  </div>
+
+  <!-- CONTENIDO: PESTAÑA USUARIOS (SOLO ADMIN) -->
+  <div *ngIf="activeTab === 'users' && user?.role === 'admin'">
+
+    <!-- Formulario de Estudiantes (Solo se ve aquí) -->
+    <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 25px; border: 1px solid #e9ecef;">
+      <h4 style="margin-top: 0; color: #333; margin-bottom: 15px;">👤 Registrar Nuevo Estudiante</h4>
+      <form [formGroup]="studentForm" (ngSubmit)="createStudent()" style="display: flex; gap: 15px; flex-wrap: wrap;">
+        <div style="flex: 1; min-width: 150px;">
+          <input type="text" formControlName="name" placeholder="Nombre completo" style="width: 100%; padding: 10px; border: 1px solid #ced4da; border-radius: 6px; box-sizing: border-box;">
+        </div>
+        <div style="flex: 1; min-width: 150px;">
+          <input type="email" formControlName="email" placeholder="Correo electrónico" style="width: 100%; padding: 10px; border: 1px solid #ced4da; border-radius: 6px; box-sizing: border-box;">
+        </div>
+        <div style="flex: 1; min-width: 150px;">
+          <input type="password" formControlName="password" placeholder="Contraseña segura" style="width: 100%; padding: 10px; border: 1px solid #ced4da; border-radius: 6px; box-sizing: border-box;">
+        </div>
+        <button type="submit" [disabled]="studentForm.invalid || isLoading" style="padding: 10px 20px; background-color: #28a745; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;" [ngStyle]="{'opacity': (studentForm.invalid || isLoading) ? '0.6' : '1'}">
+          {{ isLoading ? 'Creando...' : 'Crear Usuario' }}
+        </button>
+      </form>
+    </div>
+
+    <!-- Lista de Usuarios en forma de Tabla -->
+    <h3 style="color: #333;">Directorio de Usuarios</h3>
+    <table style="width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+      <thead style="background-color: #f1f5f9; text-align: left;">
+        <tr>
+          <th style="padding: 15px; border-bottom: 2px solid #cbd5e1; color: #475569;">Nombre</th>
+          <th style="padding: 15px; border-bottom: 2px solid #cbd5e1; color: #475569;">Correo</th>
+          <th style="padding: 15px; border-bottom: 2px solid #cbd5e1; color: #475569;">Rol</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let u of usersList" style="border-bottom: 1px solid #e2e8f0;">
+          <td style="padding: 15px; font-weight: 500;">{{ u.name }}</td>
+          <td style="padding: 15px; color: #64748b;">{{ u.email }}</td>
+          <td style="padding: 15px;">
+            <span [ngStyle]="{'background': u.role === 'admin' ? '#fde68a' : '#e0f2fe', 'color': u.role === 'admin' ? '#92400e' : '#075985'}" style="padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: bold;">
+              {{ u.role }}
+            </span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
   </div>
 </div>

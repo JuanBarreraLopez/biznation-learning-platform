@@ -6,6 +6,7 @@ import courseRoutes from './modules/courses/course.routes';
 import webhookRoutes from './modules/webhooks/webhook.routes';
 import { runClassificationJob } from './jobs/classifyStudents';
 import { errorHandler } from './middlewares/errorHandler'; 
+import userRoutes from './modules/users/user.routes';
 
 const app: Application = express();
 
@@ -20,6 +21,7 @@ app.get('/api/v1/health', (req: Request, res: Response) => {
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/courses', courseRoutes);
 app.use('/api/v1/webhooks', webhookRoutes);
+app.use('/api/v1/users', userRoutes);
 
 app.post('/api/v1/jobs/trigger-classification', async (req, res) => {
   runClassificationJob();
