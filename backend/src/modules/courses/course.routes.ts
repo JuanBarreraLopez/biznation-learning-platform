@@ -1,14 +1,16 @@
 import { Router } from 'express';
-import { createCourse, getCourses } from './course.controller';
+import { createCourse, getCourses, deleteCourse } from './course.controller'; 
 import { authenticate } from '../../middlewares/authenticate';
 import { authorize } from '../../middlewares/authorize';
+import { enroll } from './enrollment.controller';
 
 const router = Router();
 
-// Públicas
 router.get('/', getCourses);
-
-// Protegidas (Solo Admin)
 router.post('/', authenticate, authorize(['admin']), createCourse);
+
+router.delete('/:id', authenticate, authorize(['admin']), deleteCourse);
+
+router.post('/enroll', authenticate, authorize(['student']), enroll);
 
 export default router;
