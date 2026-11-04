@@ -32,21 +32,19 @@ export const createCourse = async (req: AuthRequest, res: Response): Promise<voi
 };
 
 // Obtener todos los cursos
-export const getCourses = async (req: Request, res: Response): Promise<void> => {
+export const getCourses = async (req: Request, res: Response) => {
   try {
+    // 1. Capturar paginación y búsqueda
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
+    const search = req.query.search as string || '';
     const offset = (page - 1) * limit;
 
-    const { title, fromDate, toDate } = req.query;
-    const whereClause: any = {};
+    // 2. Aplicar el filtro de título si el usuario escribió algo
+    const whereClause = search ? { title: { [Op.iLike]: `%${search}%` } } : {}; // Usa Op.like si Op.iLike te da error
 
-    if (title) whereClause.title = { [Op.iLike]: `%${title}%` };
-    if (fromDate && toDate) {
-      whereClause.createdAt = { [Op.between]: [new Date(fromDate as string), new Date(toDate as string)] };
-    }
-
-    const { count, rows } = await Course.findAndCountAll({
+    // 3. Buscar con paginación
+    const { count, rows } = await db.Course.findAndCountAll({
       where: whereClause,
       limit,
       offset,
@@ -54,12 +52,12 @@ export const getCourses = async (req: Request, res: Response): Promise<void> => 
     });
 
     res.status(200).json({
+      success: true,
       data: rows,
-      pagination: { page, limit, total: count, totalPages: Math.ceil(count / limit) }
+      meta: { total: count, page, limit, totalPages: Math.ceil(count / limit) }
     });
   } catch (error) {
-    console.error('Error al listar cursos:', error);
-    res.status(500).json({ error: 'Error interno del servidor' });
+    res.status(500).json({ success: false, error: 'Error al obtener cursos' });
   }
 };
 
@@ -97,3 +95,4 @@ export const deleteCourse = async (req: AuthRequest, res: Response): Promise<voi
     res.status(500).json({ error: 'Error interno del servidor' });
   }
 };
+

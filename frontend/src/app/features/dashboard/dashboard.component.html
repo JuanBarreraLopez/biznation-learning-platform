@@ -50,6 +50,15 @@
       </form>
     </div>
 
+    <!-- NUEVO: Buscador y Filtro (LO PEGAS AQUÍ) -->
+    <div style="margin-bottom: 20px; display: flex; gap: 10px;">
+      <input type="text" [(ngModel)]="searchTerm" placeholder="🔍 Buscar curso por título..."
+             style="flex: 1; padding: 10px; border: 1px solid #ced4da; border-radius: 6px; font-size: 15px;">
+      <button (click)="onSearch()" style="padding: 10px 20px; background-color: #475569; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold;">
+        Filtrar
+      </button>
+    </div>
+
     <!-- Grid de Cursos (Muestra catálogo o cursos propios) -->
     <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px;">
       <div *ngFor="let course of courses" style="background: white; border: 1px solid #e2e8f0; border-radius: 10px; padding: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">

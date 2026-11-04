@@ -15,10 +15,10 @@ export class CourseService {
     return { headers: new HttpHeaders({ 'Authorization': `Bearer ${this.authService.getToken()}` }) };
   }
 
-  getCourses(): Observable<any> {
-    return this.http.get<any>(this.apiUrl);
+  getCourses(search: string = ''): Observable<any> {
+    const url = search ? `${this.apiUrl}?search=${search}` : this.apiUrl;
+    return this.http.get<any>(url, this.getHeaders()); // Asegúrate de enviar los headers si la ruta está protegida
   }
-
   createCourse(courseData: any): Observable<any> {
     return this.http.post<any>(this.apiUrl, courseData, this.getHeaders());
   }

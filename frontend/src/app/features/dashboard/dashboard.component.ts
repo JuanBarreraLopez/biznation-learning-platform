@@ -1,14 +1,14 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, FormsModule, Validators } from '@angular/forms';
 import { CourseService } from '../../core/services/course.service';
 import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule],
   templateUrl: './dashboard.component.html'
 })
 export class DashboardComponent implements OnInit {
@@ -22,6 +22,7 @@ export class DashboardComponent implements OnInit {
   user: any = null;
   isLoading: boolean = false;
   uiMessage: { text: string, type: 'success' | 'error' } | null = null;
+  searchTerm: string = '';
 
   // CONTROL DE PESTAÑAS
   activeTab: 'courses' | 'users' | 'explore' = 'courses';
@@ -49,10 +50,15 @@ export class DashboardComponent implements OnInit {
   }
 
   loadCourses() {
-    this.courseService.getCourses().subscribe({
+    this.courseService.getCourses(this.searchTerm).subscribe({
       next: (response) => this.courses = response.data || [],
       error: (err) => this.showMessage('Error cargando cursos.', 'error')
     });
+  }
+
+  // Método para el botón buscar
+  onSearch() {
+    this.loadCourses();
   }
 
   loadUsers() {
