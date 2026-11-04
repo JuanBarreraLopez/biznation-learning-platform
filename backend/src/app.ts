@@ -3,7 +3,8 @@ import cors from 'cors';
 import helmet from 'helmet';
 import authRoutes from './modules/auth/auth.routes';
 import courseRoutes from './modules/courses/course.routes';
-import webhookRoutes from './modules/webhooks/webhook.routes'; // <-- 1. Importa esto
+import webhookRoutes from './modules/webhooks/webhook.routes'; 
+import { runClassificationJob } from './jobs/classifyStudents';
 
 const app: Application = express();
 
@@ -18,6 +19,13 @@ app.get('/api/v1/health', (req: Request, res: Response) => {
 // Rutas
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/courses', courseRoutes);
-app.use('/api/v1/webhooks', webhookRoutes); // <-- 2. Conecta la ruta
+app.use('/api/v1/webhooks', webhookRoutes);
+
+// 3. Endpoint oculto para disparar el Cron Job manualmente (Solo para la prueba técnica)
+app.post('/api/v1/jobs/trigger-classification', async (req, res) => {
+  // Ejecutamos la tarea en segundo plano sin bloquear la respuesta
+  runClassificationJob();
+  res.status(202).json({ message: 'Job de clasificación disparado en segundo plano' });
+});
 
 export default app;
