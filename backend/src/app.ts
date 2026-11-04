@@ -2,7 +2,8 @@ import express, { Application, Request, Response } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import authRoutes from './modules/auth/auth.routes';
-import courseRoutes from './modules/courses/course.routes'; // <-- 1. Añade esto
+import courseRoutes from './modules/courses/course.routes';
+import webhookRoutes from './modules/webhooks/webhook.routes'; // <-- 1. Importa esto
 
 const app: Application = express();
 
@@ -16,6 +17,7 @@ app.get('/api/v1/health', (req: Request, res: Response) => {
 
 // Rutas
 app.use('/api/v1/auth', authRoutes);
-app.use('/api/v1/courses', courseRoutes); // <-- 2. Añade esto
+app.use('/api/v1/courses', courseRoutes);
+app.use('/api/v1/webhooks', webhookRoutes); // <-- 2. Conecta la ruta
 
 export default app;
